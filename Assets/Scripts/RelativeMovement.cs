@@ -8,11 +8,18 @@ public class RelativeMovement : MonoBehaviour
     [SerializeField] private Transform target;
     public float rotSpeed = 15.0f;
     public float moveSpeed = 6.0f;
+    public float jumpSpeed = 15.0f;
+    public float gravity = -9.81f;
+    public float terminalVelocity = -10.0f;
+    public float minFall = -1.5f;
 
     private CharacterController _charController;
+    private float _vertSpeed;
+    private ControllerColliderHit _contact;
 
     void Start()
     {
+        _vertSpeed = minFall;
         _charController = GetComponent<CharacterController>();
     }
 
@@ -39,7 +46,53 @@ public class RelativeMovement : MonoBehaviour
             transform.rotation = Quaternion.Lerp(transform.rotation, direction, rotSpeed * Time.deltaTime);
         }
 
+        bool hitGround = false;
+        RaycastHit hit;
+        if(_vertSpeed < 0 && Physics.Raycast(transform.position, Vector3.down, out hit))
+        {
+          float check = (_charController.height + _charController.radius) / 1.9f;
+          hitGround = hit.distance <= check;
+        }
+
+        if(hitGround)
+        {
+            if(Input.GetButtonDown("Jump"))
+            {
+              _vertSpeed = jumpSpeed;
+            }
+            else
+            {
+              _vertSpeed = minFall;
+            }
+        }
+        else
+        {
+            _vertSpeed += 5 * gravity * Time.deltaTime;
+            if(_vertSpeed < terminalVelocity)
+            {
+                _vertSpeed = terminalVelocity;
+            }
+
+            if(_charController.isGrounded)
+            {
+                if(Vector3.Dot(movement, _contact.normal) < 0)
+                {
+                    movement = _contact.normal * moveSpeed;
+                }
+                else
+                {
+                    movement += _contact.normal * moveSpeed;
+                }
+            }
+        }
+        movement.y = _vertSpeed;
+
         movement *= Time.deltaTime;
         _charController.Move(movement);
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        _contact = hit;
     }
 }
