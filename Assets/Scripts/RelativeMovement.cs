@@ -12,6 +12,7 @@ public class RelativeMovement : MonoBehaviour
     public float gravity = -9.81f;
     public float terminalVelocity = -10.0f;
     public float minFall = -1.5f;
+    public float pushForce = 3.0f;
 
     private CharacterController _charController;
     private float _vertSpeed;
@@ -100,8 +101,16 @@ public class RelativeMovement : MonoBehaviour
         _charController.Move(movement);
     }
 
+
+
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         _contact = hit;
+
+        Rigidbody body = hit.collider.attachedRigidbody;
+        if (body != null && !body.isKinematic)
+        {
+          body.velocity = hit.moveDirection * pushForce;
+        }
     }
 }
