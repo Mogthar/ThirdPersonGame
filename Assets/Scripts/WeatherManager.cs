@@ -33,7 +33,7 @@ public class WeatherManager : MonoBehaviour, IGameManager
     Debug.Log("Value: " + cloudValue);
 
     Messenger.Broadcast(GameEvent.WEATHER_UPDATED);
-    
+
     status = ManagerStatus.Started;
   }
 }

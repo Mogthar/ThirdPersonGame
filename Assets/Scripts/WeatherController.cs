@@ -9,18 +9,23 @@ public class WeatherController : MonoBehaviour
 
     private float _fullIntensity;
 
-    private float _cloudValue = 0.0f;
     // Start is called before the first frame update
+    void Awake()
+    {
+      Messenger.AddListener(GameEvent.WEATHER_UPDATED, OnWeatherUpdated);
+    }
+    void OnDestroy()
+    {
+      Messenger.RemoveListener(GameEvent.WEATHER_UPDATED, OnWeatherUpdated);
+    }
     void Start()
     {
       _fullIntensity = sun.intensity;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnWeatherUpdated()
     {
-      SetOvercast(_cloudValue);
-      _cloudValue += 0.005f;
+      SetOvercast(Managers.Weather.cloudValue);
     }
 
     private void SetOvercast(float value)
